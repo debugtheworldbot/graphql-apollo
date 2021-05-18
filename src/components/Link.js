@@ -1,15 +1,64 @@
 import React from 'react';
-import {AUTH_TOKEN} from "../constants";
+import {AUTH_TOKEN, LINKS_PER_PAGE} from "../constants";
 import {timeDifferenceForDate} from "../utils";
+import {gql} from "@apollo/client/core";
+import {useMutation} from "@apollo/client";
+import {FEED_QUERY} from "./LinkList";
 
 const Link = (props) => {
-  const { link } = props;
+  const {link} = props;
   const authToken = localStorage.getItem(AUTH_TOKEN);
+  const VOTE_MUTATION = gql`
+      mutation VoteMutation($linkId: ID!) {
+          vote(linkId: $linkId) {
+              id
+              link {
+                  id
+                  votes {
+                      id
+                      user {
+                          id
+                      }
+                  }
+              }
+              user {
+                  id
+              }
+          }
+      }
+  `;
+  const [vote] = useMutation(VOTE_MUTATION, {
+    variables: {
+      linkId: link.id
+    },
+    update(cache, { data: { vote } }) {
+      const {feed} = cache.readQuery({
+        query: FEED_QUERY
+      });
 
-  // const take = LINKS_PER_PAGE;
+      const updatedLinks = feed.links.map((feedLink) => {
+        if (feedLink.id === link.id) {
+          return {
+            ...feedLink,
+            votes: [...feedLink.votes, vote]
+          };
+        }
+        return feedLink;
+      });
+
+      cache.writeQuery({
+        query: FEED_QUERY,
+        data: {
+          feed: {
+            links: updatedLinks
+          }
+        }
+      });
+    }
+  })
+  const take = LINKS_PER_PAGE;
   const skip = 0;
-  const orderBy = { createdAt: 'desc' };
-  const vote = ()=>{}
+  const orderBy = {createdAt: 'desc'};
 
   return (
     <div className="flex mt2 items-start">
@@ -18,7 +67,7 @@ const Link = (props) => {
         {authToken && (
           <div
             className="ml1 gray f11"
-            style={{ cursor: 'pointer' }}
+            style={{cursor: 'pointer'}}
             onClick={vote}
           >
             ▲
