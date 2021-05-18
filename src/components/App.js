@@ -4,6 +4,7 @@ import Header from './Header';
 import LinkList from './LinkList';
 import {Switch, Route} from 'react-router-dom';
 import Login from "./Login";
+import Search from "./Search";
 
 const App = () => {
   return (
@@ -18,6 +19,7 @@ const App = () => {
             component={CreateLink}
           />
           <Route exact path="/login" component={Login} />
+          <Route exact path="/search" component={Search} />
         </Switch>
       </div>
     </div>
