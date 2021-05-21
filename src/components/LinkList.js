@@ -122,10 +122,10 @@ const LinkList = () => {
   });
   const getLinksToRender = (isNewPage, data) => {
     if (isNewPage) return data.feed.links
-    const rankedLists = data.feed.links.slice()
-    rankedLists.sort((a, b) => b.vote.length - a.vote.length)
-    return rankedLists
-  }
+    const rankedLinks = data.feed.links.slice()
+    rankedLinks.sort((l1, l2) => l2.votes.length - l1.votes.length)
+    return rankedLinks
+  };
 
   return (
     <>
